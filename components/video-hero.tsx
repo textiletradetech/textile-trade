@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Play, Download } from "lucide-react"
 import Link from "next/link"
 import { useState, useRef } from "react"
+import { SmartDownloadButton } from "@/components/smart-download-button"
 
 export function VideoHero() {
   const [isPlaying, setIsPlaying] = useState(false)
@@ -60,16 +61,13 @@ export function VideoHero() {
               <Play className="h-5 w-5" />
               {isPlaying ? "Pause Video" : "Watch Demo"}
             </Button>
-            <Button
+            <SmartDownloadButton
               size="lg"
-              asChild
               className="gap-2 text-lg px-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
             >
-              <Link href="#download">
-                <Download className="h-5 w-5" />
-                Download App
-              </Link>
-            </Button>
+              <Download className="h-5 w-5" />
+              Download App
+            </SmartDownloadButton>
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 text-primary-foreground/80">

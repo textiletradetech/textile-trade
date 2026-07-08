@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { SmartDownloadButton } from "@/components/smart-download-button"
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -40,9 +41,9 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button asChild>
-              <a href="https://play.google.com/store/apps/details?id=com.textiletrade.in" target="_blank" rel="noopener noreferrer">Download App</a>
-            </Button>
+            <SmartDownloadButton>
+              Download App
+            </SmartDownloadButton>
           </div>
 
           <button
@@ -85,9 +86,9 @@ export function Header() {
               >
                 Contact
               </Link>
-              <Button asChild className="w-fit">
-                <a href="https://play.google.com/store/apps/details?id=com.textiletrade.in" target="_blank" rel="noopener noreferrer">Download App</a>
-              </Button>
+              <SmartDownloadButton className="w-fit">
+                Download App
+              </SmartDownloadButton>
             </nav>
           </div>
         )}

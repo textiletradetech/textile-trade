@@ -80,8 +80,8 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/#download" className="text-background/70 hover:text-background transition-colors text-sm">
-                  iOS App (Coming Soon)
+                <a href="https://apps.apple.com/in/app/textile-trade/id6764899520" target="_blank" rel="noopener noreferrer" className="text-background/70 hover:text-background transition-colors text-sm">
+                  iOS App
                 </a>
               </li>
             </ul>
