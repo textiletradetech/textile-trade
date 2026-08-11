@@ -17,10 +17,14 @@ export default function GroupInvitePage() {
 
     const fetchDetails = async () => {
       try {
-        const isProd = typeof window !== "undefined" && window.location.hostname === "textiletrade.in"
-        const defaultApiUrl = isProd
-          ? "https://hkwhmirhp3.us-east-1.awsapprunner.com/api/v1"
-          : "http://localhost:3001/api/v1"
+        const isLocal = typeof window !== "undefined" && (
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1" ||
+          window.location.hostname.startsWith("192.168.")
+        )
+        const defaultApiUrl = isLocal
+          ? "http://localhost:3001/api/v1"
+          : "https://hkwhmirhp3.us-east-1.awsapprunner.com/api/v1"
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl
         const res = await fetch(`${baseUrl}/groups/invite/validate?token=${inviteToken}`)
         const data = await res.json()
