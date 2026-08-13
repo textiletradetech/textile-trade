@@ -4,7 +4,9 @@
     "details": [
       {
         "appID": "YOUR_APPLE_TEAM_ID.com.textiletrade.in",
-        "paths": ["/group/*", "/business/*"]
+        "paths": [
+          "/group/*"
+        ]
       }
     ]
   }

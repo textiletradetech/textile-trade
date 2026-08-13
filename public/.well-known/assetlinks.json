@@ -1,11 +1,13 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.textiletrade.in",
       "sha256_cert_fingerprints": [
-        "YOUR_RELEASE_SHA256_FINGERPRINT_HERE"
+        "REPLACE_WITH_SHA256_FINGERPRINT"
       ]
     }
   }

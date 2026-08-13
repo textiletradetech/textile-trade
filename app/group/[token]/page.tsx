@@ -1,0 +1,140 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
+import { Smartphone, AlertCircle, ArrowLeft } from "lucide-react"
+
+export default function GroupInvitePage() {
+  const params = useParams()
+  const token = params?.token as string
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [group, setGroup] = useState<any>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    if (!token) return
+
+    const fetchDetails = async () => {
+      try {
+        const isLocal = typeof window !== "undefined" && (
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1" ||
+          window.location.hostname.startsWith("192.168.")
+        )
+        const defaultApiUrl = isLocal
+          ? "http://localhost:3001/api/v1"
+          : "https://hkwhmirhp3.us-east-1.awsapprunner.com/api/v1"
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl
+        const res = await fetch(`${baseUrl}/groups/invite/validate?token=${token}`)
+        const data = await res.json()
+
+        if (res.ok && data.valid) {
+          setGroup(data.group)
+        } else {
+          setError(data.error || "This group invite link is invalid or has expired.")
+        }
+      } catch (err) {
+        console.error("Fetch group invite details failed:", err)
+        setError("This group invite link is invalid or has expired.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDetails()
+  }, [token])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+    const isAndroid = /android/i.test(userAgent)
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
+
+    if (isAndroid || isIOS) {
+      setIsMobile(true)
+      // Redirect mobile users to respective app stores
+      // TODO: Replace 'idXXXXXXXXX' with the actual iOS App Store App ID once available
+      const iosStoreUrl = "https://apps.apple.com/app/idXXXXXXXXX"
+      // TODO: Replace 'com.textiletrade.in' with the actual Android package name
+      const androidStoreUrl = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
+
+      if (isIOS) {
+        window.location.href = iosStoreUrl
+      } else if (isAndroid) {
+        window.location.href = androidStoreUrl
+      }
+    } else {
+      setIsMobile(false)
+    }
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-950 flex flex-col justify-between items-center text-zinc-100 font-sans p-6">
+      {/* Top Header */}
+      <header className="w-full max-w-4xl flex justify-between items-center py-4">
+        <a href="https://textiletrade.in" className="flex items-center gap-2 text-zinc-400 hover:text-white transition duration-200">
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm font-medium">textiletrade.in</span>
+        </a>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-grow flex items-center justify-center w-full py-12">
+        {loading ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
+            <p className="text-sm text-zinc-400">Loading invite details...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 max-w-md w-full text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-950/40 text-red-400 border border-red-800/30 mb-6">
+              <AlertCircle className="h-8 w-8" />
+            </div>
+            <h1 className="text-xl font-bold text-zinc-100 mb-2">Invite Invalid</h1>
+            <p className="text-sm text-zinc-400 mb-8 leading-relaxed">{error}</p>
+            <a
+              href="https://textiletrade.in"
+              className="w-full py-3 block bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 font-medium rounded-xl transition duration-200"
+            >
+              Go to Textile Trade
+            </a>
+          </div>
+        ) : (
+          <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 max-w-md w-full flex flex-col items-center">
+            {/* Group Initials or Avatar */}
+            {group.avatar ? (
+              <img
+                src={group.avatar}
+                alt={group.name}
+                className="w-24 h-24 rounded-full object-cover border-2 border-cyan-500/20 mb-6"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-cyan-950/40 text-cyan-400 border border-cyan-800/30 flex items-center justify-center text-3xl font-bold mb-6">
+                {group.name.substring(0, 1).toUpperCase()}
+              </div>
+            )}
+
+            {/* Group Title */}
+            <h1 className="text-2xl font-bold text-zinc-100 text-center mb-2">{group.name}</h1>
+            <p className="text-sm text-zinc-400 text-center mb-6">Open on your phone to join this group</p>
+
+            <div className="w-full border-t border-zinc-800/60 pt-6 flex flex-col items-center gap-4">
+              <Smartphone className="h-10 w-10 text-cyan-400 animate-bounce" />
+              <p className="text-xs text-zinc-500 text-center max-w-[280px] leading-relaxed">
+                Scan the QR code or tap the link on your mobile device to open the TextileTrade app.
+              </p>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Bottom Footer */}
+      <footer className="w-full text-center py-6 text-xs text-zinc-600 border-t border-zinc-900">
+        <p>&copy; {new Date().getFullYear()} Textile Trade. All rights reserved.</p>
+      </footer>
+    </div>
+  )
+}
