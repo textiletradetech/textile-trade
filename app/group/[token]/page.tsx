@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import { Smartphone, AlertCircle, ArrowLeft } from "lucide-react"
+import { Globe, Users, Smartphone, Download, AlertCircle, ArrowLeft } from "lucide-react"
 
 export default function GroupInvitePage() {
   const params = useParams()
@@ -11,7 +11,30 @@ export default function GroupInvitePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [group, setGroup] = useState<any>(null)
-  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !token) return
+
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+    const isAndroid = /android/i.test(userAgent)
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
+
+    const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
+    const APP_STORE_URL = "https://apps.apple.com/in/app/textile-trade/id6764899520"
+
+    if (isAndroid) {
+      const intentUrl = `intent://group/${token}#Intent;scheme=textiletrade;package=com.textiletrade.in;S.browser_fallback_url=${encodeURIComponent(PLAY_STORE_URL)};end`
+      window.location.href = intentUrl
+    } else if (isIOS) {
+      window.location.href = `textiletrade://group/${token}`
+      const startTime = Date.now()
+      setTimeout(() => {
+        if (!document.hidden && Date.now() - startTime < 3000) {
+          window.location.href = APP_STORE_URL
+        }
+      }, 2000)
+    }
+  }, [token])
 
   useEffect(() => {
     if (!token) return
@@ -46,38 +69,25 @@ export default function GroupInvitePage() {
     fetchDetails()
   }, [token])
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !token) return
+  const handleOpenApp = () => {
+    if (!token) return
+    window.location.href = `textiletrade://group/${token}`
+  }
 
+  const handleDownloadApp = () => {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
-    const isAndroid = /android/i.test(userAgent)
-    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
-
-    const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
-    const APP_STORE_URL = "https://apps.apple.com/in/app/textile-trade/id6764899520"
-
-    if (isAndroid || isIOS) {
-      setIsMobile(true)
-
-      if (isAndroid) {
-        const intentUrl = `intent://group/${token}#Intent;scheme=textiletrade;package=com.textiletrade.in;S.browser_fallback_url=${encodeURIComponent(PLAY_STORE_URL)};end`
-        window.location.href = intentUrl
-      } else if (isIOS) {
-        window.location.href = `textiletrade://group/${token}`
-        const startTime = Date.now()
-        setTimeout(() => {
-          if (!document.hidden && Date.now() - startTime < 3000) {
-            window.location.href = APP_STORE_URL
-          }
-        }, 2000)
-      }
+    if (/android/i.test(userAgent)) {
+      window.location.href = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
+    } else if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      window.location.href = "https://apps.apple.com/in/app/textile-trade/id6764899520"
     } else {
-      setIsMobile(false)
+      window.location.href = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
     }
-  }, [token])
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-950 flex flex-col justify-between items-center text-zinc-100 font-sans p-6">
+      
       {/* Top Header */}
       <header className="w-full max-w-4xl flex justify-between items-center py-4">
         <a href="https://textiletrade.in" className="flex items-center gap-2 text-zinc-400 hover:text-white transition duration-200">
@@ -109,7 +119,7 @@ export default function GroupInvitePage() {
           </div>
         ) : (
           <div className="bg-zinc-900/60 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 max-w-md w-full flex flex-col items-center">
-            {/* Group Initials or Avatar */}
+            {/* Group Avatar */}
             {group.avatar ? (
               <img
                 src={group.avatar}
@@ -124,13 +134,47 @@ export default function GroupInvitePage() {
 
             {/* Group Title */}
             <h1 className="text-2xl font-bold text-zinc-100 text-center mb-2">{group.name}</h1>
-            <p className="text-sm text-zinc-400 text-center mb-6">Open on your phone to join this group</p>
 
-            <div className="w-full border-t border-zinc-800/60 pt-6 flex flex-col items-center gap-4">
-              <Smartphone className="h-10 w-10 text-cyan-400 animate-bounce" />
-              <p className="text-xs text-zinc-500 text-center max-w-[280px] leading-relaxed">
-                Scan the QR code or tap the link on your mobile device to open the TextileTrade app.
+            {/* Badges */}
+            <div className="flex gap-2 mb-6">
+              <div className="flex items-center gap-1.5 text-xs bg-zinc-800/50 text-zinc-300 px-3 py-1 rounded-full border border-zinc-700/40">
+                <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                <span>Public Group</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs bg-zinc-800/50 text-zinc-300 px-3 py-1 rounded-full border border-zinc-700/40">
+                <Users className="h-3.5 w-3.5 text-cyan-400" />
+                <span>{group.memberCount} members</span>
+              </div>
+            </div>
+
+            {/* Description */}
+            {group.description ? (
+              <p className="text-sm text-zinc-400 text-center mb-8 leading-relaxed px-2">
+                {group.description}
               </p>
+            ) : (
+              <p className="text-sm text-zinc-500 italic text-center mb-8 px-2">
+                No group description.
+              </p>
+            )}
+
+            {/* Action Buttons */}
+            <div className="w-full flex flex-col gap-3">
+              <button
+                onClick={handleOpenApp}
+                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Smartphone className="h-5 w-5" />
+                <span>Open in App</span>
+              </button>
+
+              <button
+                onClick={handleDownloadApp}
+                className="w-full py-3 bg-zinc-800/70 hover:bg-zinc-700/70 text-zinc-200 border border-zinc-700/60 font-semibold rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Download className="h-5 w-5" />
+                <span>Download App</span>
+              </button>
             </div>
           </div>
         )}
