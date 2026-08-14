@@ -47,29 +47,34 @@ export default function GroupInvitePage() {
   }, [token])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined" || !token) return
 
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
     const isAndroid = /android/i.test(userAgent)
     const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
 
+    const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
+    const APP_STORE_URL = "https://apps.apple.com/in/app/textile-trade/id6764899520"
+
     if (isAndroid || isIOS) {
       setIsMobile(true)
-      // Redirect mobile users to respective app stores
-      // TODO: Replace 'idXXXXXXXXX' with the actual iOS App Store App ID once available
-      const iosStoreUrl = "https://apps.apple.com/app/idXXXXXXXXX"
-      // TODO: Replace 'com.textiletrade.in' with the actual Android package name
-      const androidStoreUrl = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
 
-      if (isIOS) {
-        window.location.href = iosStoreUrl
-      } else if (isAndroid) {
-        window.location.href = androidStoreUrl
+      if (isAndroid) {
+        const intentUrl = `intent://group/${token}#Intent;scheme=textiletrade;package=com.textiletrade.in;S.browser_fallback_url=${encodeURIComponent(PLAY_STORE_URL)};end`
+        window.location.href = intentUrl
+      } else if (isIOS) {
+        window.location.href = `textiletrade://group/${token}`
+        const startTime = Date.now()
+        setTimeout(() => {
+          if (!document.hidden && Date.now() - startTime < 3000) {
+            window.location.href = APP_STORE_URL
+          }
+        }, 2000)
       }
     } else {
       setIsMobile(false)
     }
-  }, [])
+  }, [token])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-950 flex flex-col justify-between items-center text-zinc-100 font-sans p-6">

@@ -13,6 +13,30 @@ export default function GroupInvitePage() {
   const [group, setGroup] = useState<any>(null)
 
   useEffect(() => {
+    if (typeof window === "undefined" || !inviteToken) return
+
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera
+    const isAndroid = /android/i.test(userAgent)
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
+
+    const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.textiletrade.in"
+    const APP_STORE_URL = "https://apps.apple.com/in/app/textile-trade/id6764899520"
+
+    if (isAndroid) {
+      const intentUrl = `intent://group/${inviteToken}#Intent;scheme=textiletrade;package=com.textiletrade.in;S.browser_fallback_url=${encodeURIComponent(PLAY_STORE_URL)};end`
+      window.location.href = intentUrl
+    } else if (isIOS) {
+      window.location.href = `textiletrade://group/${inviteToken}`
+      const startTime = Date.now()
+      setTimeout(() => {
+        if (!document.hidden && Date.now() - startTime < 3000) {
+          window.location.href = APP_STORE_URL
+        }
+      }, 2000)
+    }
+  }, [inviteToken])
+
+  useEffect(() => {
     if (!inviteToken) return
 
     const fetchDetails = async () => {
